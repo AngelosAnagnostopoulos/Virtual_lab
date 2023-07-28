@@ -1,0 +1,57 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+servers=[
+	{
+	  :hostname => "web_server",
+	  :ip => "192.168.122.122",
+	  :box => "centos/7",
+	  :playbook => "web_playbook.yml"
+	},
+	{
+	  :hostname => "database_server",
+	  :ip => "192.168.122.243",
+	  :box => "centos/7",
+	  :playbook => "redis_playbook.yml"
+	}
+]
+
+Vagrant.configure("2") do |config|
+
+	servers.each do |machine|
+		config.vm.define machine[:hostname] do |node|
+  
+			node.vm.box = machine[:box]
+			node.vm.hostname = machine[:hostname]
+			node.vm.network "private_network", 
+				ip: machine[:ip], 
+				auto_config: false
+		  
+			node.vm.provider "libvirt" do |lb|
+			  	lb.memory = 4096
+			  	lb.cpus = 1
+		  	end
+  
+		  	node.vm.provision "ansible" do |ansible|
+				ansible.playbook = machine[:playbook]
+		  	end
+  
+	  	end
+	end
+
+    # Multiple nodes with subsequent IPs
+    n = 5
+    n.times do |i|
+
+        config.vm.define "node-#{i+1}" do |node|
+            node.vm.box = "centos/7"
+            node.vm.hostname = "node-#{i+1}"
+            node.vm.network :private_network, ip: "192.168.10.#{10+i+1}"
+            
+            node.vm.provision "ansible" do |ansible|
+                ansible.verbose = "v"
+                ansible.playbook = "nodes.yml"
+            end
+        end
+    end
+end

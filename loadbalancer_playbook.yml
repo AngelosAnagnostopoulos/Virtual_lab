@@ -1,0 +1,36 @@
+---
+- name: Installing and configuring HAProxy
+  hosts: all
+  become: true
+  tasks:
+  - name: Ensure HAProxy packages are installed 
+    yum:
+      name: haproxy
+      state: present
+  - name: Start the HAProxy service
+    service:
+          name: haproxy 
+          state: started
+  - name: Enable HAProxy
+    service:
+          name: haproxy 
+          enabled: yes  
+  
+  - name: Creating HAProxy config file
+    copy:
+      dest: "/etc/haproxy/haproxy.cfg"
+      content: |
+        backend apache_nodes
+          mode http
+          balance roundrobin
+          server node1 192.168.56.10:80 check
+          server node2 192.168.56.11:80 check
+        
+        frontend main
+          mode http
+          bind *:80
+          default_backend apache_nodes
+  - name: Restart HAProxy
+    service:
+          name: haproxy 
+          state: reloaded  

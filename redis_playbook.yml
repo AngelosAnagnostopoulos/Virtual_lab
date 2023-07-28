@@ -1,0 +1,39 @@
+---
+- name: Install Redis on database nodes
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Install extended packages for enterprise linux
+      yum:
+        name: 
+          epel-release
+        state: latest
+
+    - name: Ensure latest Redis version is installed
+      yum:
+        name:
+          redis
+        state: latest
+
+    - name: Ensure Redis is started
+      service: 
+        name: redis
+        state: started
+
+    - name: Install git and vim
+      tags: always
+      yum:
+        name: 
+          - vim
+          - git
+        state: latest
+        update_cache: yes
+
+  handlers:
+
+    - name: Redis Restart
+      service: 
+        name: redis
+        state: restarted
+        enabled: yes

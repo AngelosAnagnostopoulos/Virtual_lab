@@ -1,14 +1,23 @@
 ---
-  - name: Playbook
-    hosts: webservers
-    become: yes
-    become_user: root
+  - name: Web server initial configuration
+    hosts: all
+    become: true
+
     tasks:
-      - name: ensure apache is at the latest version
+      - name: Ensure apache is at the latest version
         yum:
           name: httpd
           state: latest
-      - name: ensure apache is running
+      - name: Ensure apache is running
         service:
           name: httpd
           state: started
+
+      - name: Install git and vim
+        tags: always
+        yum:
+          name: 
+            - vim
+            - git
+          state: latest
+          update_cache: yes
